@@ -10,7 +10,9 @@ I'm starting to understand Go and see this as a great way to boost my skills.
 
 **Database:**
 
-For now I'm thinking about using Mongo. I initially tried this project using Postgres and found that the DB alterations were tedious and time consuming. I also want to store Users and their recipes in a particular way, and think that Mongo would be perfect for it. If all the information could be in a single User struct, life would be good. 
+For now I'm thinking about using Mongo. I initially tried this project using Postgres and found that the DB alterations were tedious and time consuming. I also want to store Users and their recipes in a particular way, and think that Mongo would be perfect for it. If all the information could be in a single User struct, life would be good.
+
+I just want to add that Mongo's docs are awesome. They have everthing built out for go. This should be really fun. 
 
 **Front-End Overview:**
 
