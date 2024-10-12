@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
-    
-    "go.mongodb.org/mongo-driver/mongo"
+
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -25,4 +26,15 @@ func connectToMongo(uri string) (*mongo.Client, error) {
     }
 
     return client, nil
+}
+
+func insertUser(db *mongo.Client, u *User) error {
+    coll := db.Database("recipe-website").Collection("users")
+
+    result, err := coll.InsertOne(context.TODO(), u)
+    if err != nil {
+        panic(err)
+    }
+    fmt.Printf("Document inserted with ID: %s\n", result.InsertedID)
+    return nil
 }

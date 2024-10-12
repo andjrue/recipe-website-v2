@@ -26,5 +26,12 @@ func main() {
 
     fmt.Println("Connected to DB")
     defer client.Disconnect(context.Background())
+    
+    // SERVER
+    s := NewServer(":6969", client)
+    log.Println("Listening on port: ", s)
+
+    s.Run() 
+
 }
 

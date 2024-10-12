@@ -2,18 +2,22 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Server struct {
     addr string
+    db *mongo.Client
 }
 
-func (s *Server) newServer(addr string) *Server {
+func NewServer(addr string, db *mongo.Client) *Server {
     return &Server{
         addr: addr,
+        db: db,
     }
 }
 
@@ -33,7 +37,7 @@ func (s *Server) Run() {
                 writeJson(w, http.StatusBadRequest, err)
             }
         } else if r.Method == "POST" {
-            err := handleAddUser(w, r)
+            err := s.handleAddUser(w, r)
             if err != nil {
                 writeJson(w, http.StatusBadRequest, err)
             }
@@ -43,6 +47,7 @@ func (s *Server) Run() {
     })
 
     http.ListenAndServe(s.addr, router)
+    log.Println("Server running")
 }
 
 func handleGetUsers(w http.ResponseWriter, r *http.Request) error {
@@ -50,8 +55,9 @@ func handleGetUsers(w http.ResponseWriter, r *http.Request) error {
     // Do something
 }
 
-func handleAddUser(w http.ResponseWriter, r *http.Request) error {
-    return nil
-    // Do something
+func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) error {
+    u := newUser("testemail1@gmail.com", "testuser1", "testpass1")
+    insertUser(s.db, u)
+    return writeJson(w, http.StatusOK, u)
 }
 
