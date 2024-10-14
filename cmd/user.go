@@ -1,19 +1,16 @@
 package main
 
 type User struct {
-    
-    Email string
-    Username string
-    Password string
-    // Recipes []Recipe -- Will add this later
+	Email    string `bson:"email"`
+	Username string `bson:"username"`
+	Password string `bson:"password"`
+	// Recipes []Recipe -- Will add this later
 }
 
 func newUser(email, username, password string) *User {
-    return &User{
-        Email: email,
-        Username: username,
-        Password: password,
-    }
+	return &User{
+		Email:    email,
+		Username: username,
+		Password: password,
+	}
 }
-
-
