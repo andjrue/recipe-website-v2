@@ -105,10 +105,31 @@ func updateUser(db *mongo.Client, username, newPassword string) error {
         panic(err)
     }
     if res.MatchedCount == 0 {
-        log.Println("No user found with username - %v", username)
+        log.Printf("No user found with username - %v", username)
     } 
 
     log.Printf("Successfully updated password for %v", username)
+    return nil
+
+}
+
+func deleteUser(db *mongo.Client, username string) error {
+    envErr := godotenv.Load()
+    if envErr != nil {
+        log.Fatal("Issue loading env - insertUser")
+    }
+    
+    DB := os.Getenv("DB")
+    coll := db.Database(DB).Collection("users")
+    filter := bson.M{"username": username}
+
+    res, err := coll.DeleteOne(context.TODO(), filter)
+    if err != nil {
+        log.Printf("Issue deleting user - %v: %v\n", username, err)
+        panic(err)
+    }
+    log.Printf("User successfully deleted: %v", res)
+
     return nil
 
 }
