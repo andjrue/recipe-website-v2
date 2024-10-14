@@ -87,3 +87,28 @@ func getAllUsers(db *mongo.Client) ([]User, error) {
 	}
     return results, nil
 }
+
+func updateUser(db *mongo.Client, username, newPassword string) error {
+
+    envErr := godotenv.Load()
+    if envErr != nil {
+        log.Fatal("Issue loading env - insertUser")
+    }
+    DB := os.Getenv("DB")
+    coll := db.Database(DB).Collection("users")
+    filter := bson.M{"username": username}
+    
+    update := bson.M{"$set": bson.M{"password": newPassword}}
+
+    res, err := coll.UpdateOne(context.TODO(), filter, update)
+    if err != nil {
+        panic(err)
+    }
+    if res.MatchedCount == 0 {
+        log.Println("No user found with username - %v", username)
+    } 
+
+    log.Printf("Successfully updated password for %v", username)
+    return nil
+
+}

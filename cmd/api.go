@@ -46,6 +46,21 @@ func (s *Server) Run() {
         }
     })
 
+    router.HandleFunc("/users/{username}", func(w http.ResponseWriter, r *http.Request) {
+        if r.Method == "GET" {
+            // The use case is someone clicking into someone's profile I guess. 
+            writeJson(w, http.StatusBadRequest, nil)
+            // TO DO
+        } else if r.Method == "PATCH" {
+            err := s.handleUserUpdate(w, r)
+            if err != nil {
+                writeJson(w, http.StatusBadRequest, err)
+            }
+        } else {
+            writeJson(w, http.StatusNotFound, nil)
+        }
+    })
+
     http.ListenAndServe(s.addr, router)
     log.Println("Server running")
 }
@@ -68,3 +83,10 @@ func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) error {
     return writeJson(w, http.StatusOK, u)
 }
 
+func (s *Server) handleUserUpdate(w http.ResponseWriter, r *http.Request) error {
+    np := "SuccessfullyUpdatedPass1"
+    username := "testuser2"
+
+    updateUser(s.db, username, np)
+    return writeJson(w, http.StatusOK, nil)
+}
