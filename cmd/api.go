@@ -82,10 +82,11 @@ func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) error
 }
 
 func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) error {
-	var user, pass bool
-	u := newUser("testemail4@gmail.com", "testuser4", "testpass4")
+    u := &User{Email: "testemail3@gmail.com", Username: "testuser3", Password: "testpass3"}
+    log.Printf("User - %v", u)
     log.Println("Requesting user checks - username pass")
-	user, pass = checkUsernameAndPass(s.db, u.Username, u.Password)
+    user, pass := checkUsernameAndPass(s.db, u.Username, u.Password)
+    log.Printf("User: %v\n pass: %v", user, pass)
 
 	if user && pass {
 		err := insertUser(s.db, u)
