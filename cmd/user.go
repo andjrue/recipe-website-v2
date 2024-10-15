@@ -4,8 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"sync"
-	"time"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,32 +31,27 @@ func hashPass(password string) error {
 
 func checkUsernameAndPass(db *mongo.Client, username, password string) (bool, bool) {
 
-    var wg sync.WaitGroup
 
-	userNoExists := make(chan bool)
-	passIsGood := make(chan bool)
+	userNoExists := make(chan bool, 1)
+	passIsGood := make(chan bool, 1)
 
 	envErr := godotenv.Load()
 	if envErr != nil {
 		log.Fatal("Issue loading env - insertUser")
 	}
-    wg.Add(1)
 	go func() {
 // TODO -- Maybe make this more complicated? Not sure how I want to do this yet
-        defer wg.Done()
 		log.Println("Checking pass")
 		if len(password) >= 8 {
 			log.Println("Password passes")
 			passIsGood <- true
+            log.Println("Pass send to passisgood")
 		}
 		log.Println("a")
 		passIsGood <- false
 	}()
 
-    wg.Add(1)
 	go func() {
-        defer wg.Done()
-        time.Sleep(time.Millisecond)
 		log.Println("Checking username")
 		DB := os.Getenv("DB")
 		coll := db.Database(DB).Collection("users")
@@ -68,24 +61,19 @@ func checkUsernameAndPass(db *mongo.Client, username, password string) (bool, bo
 
 		err := coll.FindOne(context.TODO(), filter).Decode(&result)
 		log.Println("b")
-        log.Printf("findone is not returning err: %v", err)
 		if err != nil {
 			log.Println("c")
 			if err == mongo.ErrNoDocuments {
 				log.Printf("Did not find user in DB: %v", username)
 				userNoExists <- true
-			} else {
-				log.Println("d")
-				userNoExists <- false
-				panic(err)
-			}
+                log.Println("sent to usernoexists")
+			} 
 		} else {
             log.Printf("Result from FindOne: %v", result)
+            userNoExists <- false
         }
 
 	}()
-
-    wg.Wait()
 
 	log.Println("e")
 	user := <-userNoExists
