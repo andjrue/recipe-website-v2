@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
-    "context"
-    "go.mongodb.org/mongo-driver/bson"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
@@ -21,18 +23,22 @@ func (s *Server) checkUserSignin(w http.ResponseWriter, r *http.Request) error {
 	    This sounds pretty easy, but we'll see.
 	*/
 
-    username := "testuser4"
-    password := "testpass100"
+    var u User
+    decoder := json.NewDecoder(r.Body)
+    err := decoder.Decode(&u)
+    if err != nil {
+        http.Error(w, "Invalid request payload - checkUserSignin", http.StatusBadRequest)
+    }
 
 	log.Println("Checking username")
 
 	DB := os.Getenv("DB")
 	coll := s.db.Database(DB).Collection("users")
-	filter := bson.M{"username": username}
+	filter := bson.M{"username": u.Username}
 
 	var result User
 
-	err := coll.FindOne(context.TODO(), filter).Decode(&result)
+	err = coll.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
         if err == mongo.ErrNoDocuments {
             writeJson(w, http.StatusBadRequest, err)
@@ -41,7 +47,7 @@ func (s *Server) checkUserSignin(w http.ResponseWriter, r *http.Request) error {
         }
     }
 
-    err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
+    err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(u.Password))
     if err != nil {
         writeJson(w, http.StatusBadRequest, err)
         log.Fatal("Passwords do not match")
