@@ -5,8 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gorilla/pat"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Server struct {
@@ -28,7 +29,7 @@ func writeJson(w http.ResponseWriter, status int, v any) error {
 }
 
 func (s *Server) Run() {
-	router := mux.NewRouter()
+	router := pat.New()
 
 	router.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
@@ -82,14 +83,21 @@ func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) error
 }
 
 func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) error {
-    u := &User{Email: "testemail3@gmail.com", Username: "testuser3", Password: "testpass3"}
+    u := &User{Email: "testemail4@gmail.com", Username: "testuser4", Password: "testpass4"}
     log.Printf("User - %v", u)
     log.Println("Requesting user checks - username pass")
     user, pass := checkUsernameAndPass(s.db, u.Username, u.Password)
     log.Printf("User: %v\n pass: %v", user, pass)
 
 	if user && pass {
-		err := insertUser(s.db, u)
+        hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
+        if err != nil {
+            log.Fatal("Not able to hashpassword")
+        }
+        
+        u.Password = string(hash)
+
+		err = insertUser(s.db, u)
 		if err != nil {
 			log.Printf("error adding user to db - user & pass: %v", err)
 		}
