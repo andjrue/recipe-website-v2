@@ -31,6 +31,8 @@ func writeJson(w http.ResponseWriter, status int, v any) error {
 func (s *Server) Run() {
 	router := pat.New()
 
+    // BACKEND USER INFORMATION
+
 	router.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			err := s.handleGetAllUsers(w, r)
@@ -45,7 +47,7 @@ func (s *Server) Run() {
 		} else {
 			writeJson(w, http.StatusNotFound, nil)
 		}
-	})
+	})  
 
 	router.HandleFunc("/users/{username}", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
@@ -67,6 +69,20 @@ func (s *Server) Run() {
 			writeJson(w, http.StatusBadRequest, nil)
 		}
 	})
+
+    // USER SIGN IN 
+
+    router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
+        if r.Method == "POST" {
+            // TODO -- Should query the DB, find the username and check if information entered in is correct. Should be prett simple?
+            err := s.checkUserSignin(w, r) 
+            if err != nil {
+                writeJson(w, http.StatusBadRequest, nil)
+                log.Fatal("User creds do not match")
+            }
+            writeJson(w, http.StatusOK, nil)
+        }
+    })
 
 	http.ListenAndServe(s.addr, router)
 	log.Println("Server running")

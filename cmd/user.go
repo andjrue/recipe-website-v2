@@ -25,10 +25,6 @@ func newUser(email, username, password string) *User {
 	}
 }
 
-func hashPass(password string) error {
-	return nil
-}
-
 func checkUsernameAndPass(db *mongo.Client, username, password string) (bool, bool) {
 
 
