@@ -8,7 +8,6 @@ import (
     "github.com/rs/cors"
 	"github.com/gorilla/pat"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Server struct {
@@ -16,12 +15,19 @@ type Server struct {
 	db   *mongo.Client
 }
 
+type ApiError struct {
+    Error string
+}
+
+
 func NewServer(addr string, db *mongo.Client) *Server {
 	return &Server{
 		addr: addr,
 		db:   db,
 	}
 }
+
+
 
 func writeJson(w http.ResponseWriter, status int, v any) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -54,8 +60,11 @@ func (s *Server) Run() {
         log.Println("Request received")
 		if r.Method == "GET" {
 			// The use case is someone clicking into someone's profile I guess.
-			writeJson(w, http.StatusBadRequest, nil)
-			// TO DO
+
+            // Do we really want this to be an error? I think we'll set it up eventually
+            // so that someone can look at someone elses profile. 
+            // I'll leave it like this for now I guess. 
+            writeJson(w, http.StatusBadRequest, nil)
 		} else if r.Method == "PATCH" {
 			err := s.handleUserUpdate(w, r)
 			if err != nil {
@@ -79,12 +88,13 @@ func (s *Server) Run() {
 			// TODO -- Should query the DB, find the username and check if information entered in is correct. Should be prett simple?
 			err := s.checkUserSignin(w, r)
 			if err != nil {
-				writeJson(w, http.StatusBadRequest, nil)
+                writeJson(w, http.StatusBadRequest, err)
 				log.Fatal("User creds do not match")
 			}
 			writeJson(w, http.StatusOK, nil)
 		}
 	})
+    // RECIPE ROUTES
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173"},
@@ -99,63 +109,3 @@ func (s *Server) Run() {
 	log.Println("Server running")
 }
 
-func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) error {
-
-	users, err := getAllUsers(s.db)
-	if err != nil {
-		log.Printf("get all users err: %v", err)
-	}
-
-	return writeJson(w, http.StatusOK, users)
-}
-
-func (s *Server) handleAddUser(w http.ResponseWriter, r *http.Request) error {
-
-    var u User
-
-    decoder := json.NewDecoder(r.Body)
-    err := decoder.Decode(&u)
-
-    if err != nil {
-        http.Error(w, "Invalid request payload", http.StatusBadRequest)
-        return err
-    }
-
-	log.Printf("User - %v", u)
-	log.Println("Requesting user checks - username pass")
-	user, pass := checkUsernameAndPass(s.db, u.Username, u.Password)
-	log.Printf("User: %v\n pass: %v", user, pass)
-
-	if user && pass {
-		hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
-		if err != nil {
-			log.Fatal("Not able to hashpassword")
-		}
-
-		u.Password = string(hash)
-
-		err = insertUser(s.db, &u)
-		if err != nil {
-			log.Printf("error adding user to db - user & pass: %v", err)
-		}
-		return writeJson(w, http.StatusOK, u)
-	} else {
-		return writeJson(w, http.StatusBadRequest, nil)
-	}
-
-}
-
-func (s *Server) handleUserUpdate(w http.ResponseWriter, r *http.Request) error {
-	np := "SuccessfullyUpdatedPass1"
-	username := "testuser2"
-
-	updateUser(s.db, username, np)
-	return writeJson(w, http.StatusOK, nil)
-}
-
-func (s *Server) handleUserDelete(w http.ResponseWriter, r *http.Request) error {
-	username := "testuser2"
-
-	deleteUser(s.db, username)
-	return writeJson(w, http.StatusOK, nil)
-}

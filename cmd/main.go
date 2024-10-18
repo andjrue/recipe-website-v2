@@ -31,7 +31,11 @@ func main() {
     s := NewServer(":6969", client)
     log.Println("Listening on port: ", s)
 
-    s.Run() 
+    s.Run()
+
+    log.Println("Server closed?")
+
+    select {}
 
 }
 
