@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"context"
@@ -7,14 +7,15 @@ import (
 	"log"
 	"os"
 	"time"
-
+    
+    "github.com/andjrue/recipe-website-v2/internal/users"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func connectToMongo(uri string) (*mongo.Client, error) {
+func ConnectToMongo(uri string) (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI(uri)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -33,7 +34,7 @@ func connectToMongo(uri string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func insertUser(db *mongo.Client, u *User) error {
+func InsertUser(db *mongo.Client, u *User) error {
 
     envErr := godotenv.Load()
     if envErr != nil {
@@ -52,7 +53,7 @@ func insertUser(db *mongo.Client, u *User) error {
 	return nil
 }
 
-func getAllUsers(db *mongo.Client) ([]User, error) {
+func GetAllUsers(db *mongo.Client) ([]User, error) {
 
     envErr := godotenv.Load()
     if envErr != nil {
@@ -88,7 +89,7 @@ func getAllUsers(db *mongo.Client) ([]User, error) {
     return results, nil
 }
 
-func updateUser(db *mongo.Client, username, newPassword string) error {
+func UpdateUser(db *mongo.Client, username, newPassword string) error {
 
     envErr := godotenv.Load()
     if envErr != nil {
@@ -113,7 +114,7 @@ func updateUser(db *mongo.Client, username, newPassword string) error {
 
 }
 
-func deleteUser(db *mongo.Client, username string) error {
+func DeleteUser(db *mongo.Client, username string) error {
     envErr := godotenv.Load()
     if envErr != nil {
         log.Fatal("Issue loading env - insertUser")

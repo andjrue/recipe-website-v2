@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+    "github.com/andjrue/recipe-website-v2/internal/db"
+    "github.com/andjrue/recipe-website-v2/internal/router"
 )
 
 
@@ -19,7 +21,7 @@ func main() {
     }
 
     uri := os.Getenv("MONGODB_URI")
-    client, err := connectToMongo(uri)
+    client, err := ConnectToMongo(uri)
     if err != nil {
         log.Println("Issue connecting to DB: \n", err)
     }

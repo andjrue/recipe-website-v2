@@ -1,8 +1,5 @@
 package recipes
 
-import (
-    "github.com/andjrue/recipe-website-v2/cmd/router.go"
-)
 
 type Recipe struct {
     Title string 

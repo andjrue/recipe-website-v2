@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"context"
@@ -7,13 +7,16 @@ import (
 	"net/http"
 	"os"
 
-	"go.mongodb.org/mongo-driver/bson"
+    "github.com/andjrue/recipe-website-v2/structs"
+    "github.com/andjrue/recipe-website-v2/users"
+    "github.com/andjrue/recipe-website-v2/router"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *Server) checkUserSignin(w http.ResponseWriter, r *http.Request) error {
+func (s *Server) CheckUserSignin(w http.ResponseWriter, r *http.Request) error {
 	/*  We will need to query the DB with provided credentials from the user.
 	        -> Username & Pass
 
@@ -41,7 +44,7 @@ func (s *Server) checkUserSignin(w http.ResponseWriter, r *http.Request) error {
 	err = coll.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
         if err == mongo.ErrNoDocuments {
-            writeJson(w, http.StatusBadRequest, err)
+            WriteJson(w, http.StatusBadRequest, err)
 
             log.Fatal("No user found with that username")
         }
@@ -49,7 +52,7 @@ func (s *Server) checkUserSignin(w http.ResponseWriter, r *http.Request) error {
 
     err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(u.Password))
     if err != nil {
-        writeJson(w, http.StatusBadRequest, err)
+        WriteJson(w, http.StatusBadRequest, err)
         log.Fatal("Passwords do not match")
     }
     log.Println("Check sucsessful. User signed in.")

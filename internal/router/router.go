@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"encoding/json"
@@ -15,9 +15,7 @@ type Server struct {
 	db   *mongo.Client
 }
 
-type ApiError struct {
-    Error string
-}
+
 
 
 func NewServer(addr string, db *mongo.Client) *Server {
@@ -29,7 +27,7 @@ func NewServer(addr string, db *mongo.Client) *Server {
 
 
 
-func writeJson(w http.ResponseWriter, status int, v any) error {
+func WriteJson(w http.ResponseWriter, status int, v any) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(v)
@@ -64,20 +62,20 @@ func (s *Server) Run() {
             // Do we really want this to be an error? I think we'll set it up eventually
             // so that someone can look at someone elses profile. 
             // I'll leave it like this for now I guess. 
-            writeJson(w, http.StatusBadRequest, nil)
+            WriteJson(w, http.StatusBadRequest, nil)
 		} else if r.Method == "PATCH" {
 			err := s.handleUserUpdate(w, r)
 			if err != nil {
-				writeJson(w, http.StatusBadRequest, err)
+				WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else if r.Method == "DELETE" { // We want this here and not on Users, because we don't want someone deleting someone else.
 			err := s.handleUserDelete(w, r)
 			if err != nil {
-				writeJson(w, http.StatusBadRequest, err)
+				WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else {
 			log.Println("aaaaaaaa")
-			writeJson(w, http.StatusBadRequest, nil)
+			WriteJson(w, http.StatusBadRequest, nil)
 		}
 	})
 
@@ -88,7 +86,7 @@ func (s *Server) Run() {
 			// TODO -- Should query the DB, find the username and check if information entered in is correct. Should be prett simple?
 			err := s.checkUserSignin(w, r)
 			if err != nil {
-                writeJson(w, http.StatusBadRequest, err)
+                WriteJson(w, http.StatusBadRequest, err)
 				log.Fatal("User creds do not match")
 			}
 		} 
@@ -100,13 +98,13 @@ func (s *Server) Run() {
         if r.Method == "GET" {
             err := s.HandleGetAllRecipes(w, r) // TODO
             if err != nil {
-                writeJson(w, http.StatusBadRequest, err) // This really shouldn't happen, but you never know
+                WriteJson(w, http.StatusBadRequest, err) // This really shouldn't happen, but you never know
                 log.Println("No recipes available: %v", err)
             }
         } else if r.Method == "POST" {
             err := s.HandleAddRecipe(w, r) // TODO
             if err != nil {
-                writeJson(w, http.StatusBadRequest, err)
+                WriteJson(w, http.StatusBadRequest, err)
                 log.Println("Error adding recipe to user: %v", err)
             }
         }
