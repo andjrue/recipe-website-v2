@@ -7,14 +7,22 @@ import (
 	"net/http"
 	"os"
 
-    "github.com/andjrue/recipe-website-v2/structs"
-    "github.com/andjrue/recipe-website-v2/users"
-    "github.com/andjrue/recipe-website-v2/router"
+    "github.com/andjrue/recipe-website-v2/internal/structs"
+    "github.com/andjrue/recipe-website-v2/internal/users"
+    "github.com/andjrue/recipe-website-v2/internal/router"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type Server structs.Server // I see, this is interesting.
+
+/* One really weird thing with Go:
+   I can update User no problem, but because a method is being called on Server (right below)
+   you need to set up a new type for it that points to the package. 
+*/
+
 
 func (s *Server) CheckUserSignin(w http.ResponseWriter, r *http.Request) error {
 	/*  We will need to query the DB with provided credentials from the user.
@@ -26,7 +34,7 @@ func (s *Server) CheckUserSignin(w http.ResponseWriter, r *http.Request) error {
 	    This sounds pretty easy, but we'll see.
 	*/
 
-    var u User
+    var u users.User
     decoder := json.NewDecoder(r.Body)
     err := decoder.Decode(&u)
     if err != nil {
@@ -36,15 +44,15 @@ func (s *Server) CheckUserSignin(w http.ResponseWriter, r *http.Request) error {
 	log.Println("Checking username")
 
 	DB := os.Getenv("DB")
-	coll := s.db.Database(DB).Collection("users")
+	coll := s.Db.Database(DB).Collection("users")
 	filter := bson.M{"username": u.Username}
 
-	var result User
+	var result users.User
 
 	err = coll.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
         if err == mongo.ErrNoDocuments {
-            WriteJson(w, http.StatusBadRequest, err)
+            router.WriteJson(w, http.StatusBadRequest, err)
 
             log.Fatal("No user found with that username")
         }
@@ -52,7 +60,7 @@ func (s *Server) CheckUserSignin(w http.ResponseWriter, r *http.Request) error {
 
     err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(u.Password))
     if err != nil {
-        WriteJson(w, http.StatusBadRequest, err)
+        router.WriteJson(w, http.StatusBadRequest, err)
         log.Fatal("Passwords do not match")
     }
     log.Println("Check sucsessful. User signed in.")

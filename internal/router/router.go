@@ -1,37 +1,30 @@
 package router
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
-    
-    "github.com/rs/cors"
+
+	"github.com/andjrue/recipe-website-v2/internal/db"
+	"github.com/andjrue/recipe-website-v2/internal/structs"
+	"github.com/andjrue/recipe-website-v2/internal/users"
 	"github.com/gorilla/pat"
+	"github.com/rs/cors"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Server struct {
-	addr string
-	db   *mongo.Client
-}
-
+type Server structs.Server
 
 
 
 func NewServer(addr string, db *mongo.Client) *Server {
 	return &Server{
-		addr: addr,
-		db:   db,
+		Addr: addr,
+		Db:   db,
 	}
 }
 
 
 
-func WriteJson(w http.ResponseWriter, status int, v any) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	return json.NewEncoder(w).Encode(v)
-}
 
 func (s *Server) Run() {
 	router := pat.New()
@@ -40,17 +33,17 @@ func (s *Server) Run() {
 
 	router.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			err := s.handleGetAllUsers(w, r)
+			err := users.HandleGetAllUsers(w, r)
 			if err != nil {
-				writeJson(w, http.StatusBadRequest, err)
+				db.WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else if r.Method == "POST" {
-			err := s.handleAddUser(w, r)
+			err := users.HandleAddUser(w, r)
 			if err != nil {
-				writeJson(w, http.StatusBadRequest, err)
+				db.WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else {
-			writeJson(w, http.StatusNotFound, nil)
+			db.WriteJson(w, http.StatusNotFound, nil)
 		}
 	})
 
@@ -62,20 +55,20 @@ func (s *Server) Run() {
             // Do we really want this to be an error? I think we'll set it up eventually
             // so that someone can look at someone elses profile. 
             // I'll leave it like this for now I guess. 
-            WriteJson(w, http.StatusBadRequest, nil)
+            db.WriteJson(w, http.StatusBadRequest, nil)
 		} else if r.Method == "PATCH" {
-			err := s.handleUserUpdate(w, r)
+			err := db.HandleUserUpdate(w, r)
 			if err != nil {
-				WriteJson(w, http.StatusBadRequest, err)
+				db.WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else if r.Method == "DELETE" { // We want this here and not on Users, because we don't want someone deleting someone else.
-			err := s.handleUserDelete(w, r)
+			err := db.HandleUserDelete(w, r)
 			if err != nil {
-				WriteJson(w, http.StatusBadRequest, err)
+				db.WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else {
 			log.Println("aaaaaaaa")
-			WriteJson(w, http.StatusBadRequest, nil)
+			db.WriteJson(w, http.StatusBadRequest, nil)
 		}
 	})
 
@@ -84,9 +77,9 @@ func (s *Server) Run() {
 	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			// TODO -- Should query the DB, find the username and check if information entered in is correct. Should be prett simple?
-			err := s.checkUserSignin(w, r)
+			err := db.CheckUserSignin(w, r)
 			if err != nil {
-                WriteJson(w, http.StatusBadRequest, err)
+                db.WriteJson(w, http.StatusBadRequest, err)
 				log.Fatal("User creds do not match")
 			}
 		} 
@@ -96,15 +89,15 @@ func (s *Server) Run() {
 
     router.HandleFunc("/getAllRecipes", func(w http.ResponseWriter, r *http.Request) {
         if r.Method == "GET" {
-            err := s.HandleGetAllRecipes(w, r) // TODO
+            err := db.HandleGetAllRecipes(w, r) // TODO
             if err != nil {
-                WriteJson(w, http.StatusBadRequest, err) // This really shouldn't happen, but you never know
+                db.WriteJson(w, http.StatusBadRequest, err) // This really shouldn't happen, but you never know
                 log.Println("No recipes available: %v", err)
             }
         } else if r.Method == "POST" {
-            err := s.HandleAddRecipe(w, r) // TODO
+            err := db.HandleAddRecipe(w, r) // TODO
             if err != nil {
-                WriteJson(w, http.StatusBadRequest, err)
+                db.WriteJson(w, http.StatusBadRequest, err)
                 log.Println("Error adding recipe to user: %v", err)
             }
         }
@@ -119,7 +112,7 @@ func (s *Server) Run() {
 
 	handler := c.Handler(router)
 
-    err := http.ListenAndServe(s.addr, handler)
+    err := http.ListenAndServe(s.Addr, handler)
 	if err != nil {
         log.Printf("error listen and server: %v", err)
     }

@@ -2,9 +2,7 @@ package structs
 
 import (
     
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type User struct {
@@ -23,6 +21,6 @@ type Recipe struct {
 }
 
 type Server struct {
-	addr string
-	db   *mongo.Client
+	Addr string
+	Db   *mongo.Client
 }

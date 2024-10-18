@@ -7,13 +7,26 @@ import (
 	"log"
 	"os"
 	"time"
-    
-    "github.com/andjrue/recipe-website-v2/internal/users"
+    "net/http"
+
+	"github.com/andjrue/recipe-website-v2/internal/structs"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+
+
+
+type User *structs.User
+
+func WriteJson(w http.ResponseWriter, status int, v any) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	return json.NewEncoder(w).Encode(v)
+}
+
 
 func ConnectToMongo(uri string) (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI(uri)
@@ -34,7 +47,7 @@ func ConnectToMongo(uri string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func InsertUser(db *mongo.Client, u *User) error {
+func InsertUser(db *mongo.Client, u *structs.User) error {
 
     envErr := godotenv.Load()
     if envErr != nil {

@@ -7,28 +7,24 @@ import (
 	"net/http"
 	"os"
 
-    "github.com/andjrue/recipe-website-v2/internal/db"
-
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/andjrue/recipe-website-v2/internal/db"
+	"github.com/andjrue/recipe-website-v2/internal/structs"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type User struct {
-	Email    string           `bson:"email"`
-	Username string           `bson:"username"`
-	Password string           `bson:"password"`
-	Recipes  []recipes.Recipe `bson:"recipes"`
-}
+type Server structs.Server
+type User structs.User
 
-func NewUser(email, username, password string, recipe recipes.Recipe) *User {
-	return &User{
+func NewUser(email, username, password string, recipe structs.Recipe) *structs.User {
+	return &structs.User{
 		Email:    email,
 		Username: username,
 		Password: password,
-        Recipes: []recipes.Recipe{recipe},
+		Recipes:  []structs.Recipe{recipe},
 	}
 }
 
@@ -91,22 +87,22 @@ func CheckUsernameAndPass(db *mongo.Client, username, password string) (bool, bo
 }
 
 func CheckEmail(email string) error {
-	return nil
+	return nil // TODO
 }
 
 func (s *Server) HandleGetAllUsers(w http.ResponseWriter, r *http.Request) error {
 
-	users, err := GetAllUsers(s.db)
+	users, err := db.GetAllUsers(s.Db)
 	if err != nil {
 		log.Printf("get all users err: %v", err)
 	}
 
-	return WriteJson(w, http.StatusOK, users)
+	return db.WriteJson(w, http.StatusOK, users)
 }
 
 func (s *Server) HandleAddUser(w http.ResponseWriter, r *http.Request) error {
 
-	var u User
+	var u structs.User
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)
@@ -118,7 +114,7 @@ func (s *Server) HandleAddUser(w http.ResponseWriter, r *http.Request) error {
 
 	log.Printf("User - %v", u)
 	log.Println("Requesting user checks - username pass")
-	user, pass := CheckUsernameAndPass(s.db, u.Username, u.Password)
+	user, pass := CheckUsernameAndPass(s.Db, u.Username, u.Password)
 	log.Printf("User: %v\n pass: %v", user, pass)
 
 	if user && pass {
@@ -129,13 +125,13 @@ func (s *Server) HandleAddUser(w http.ResponseWriter, r *http.Request) error {
 
 		u.Password = string(hash)
 
-		err = InsertUser(s.db, &u)
+		err = db.InsertUser(s.Db, &u)
 		if err != nil {
 			log.Printf("error adding user to db - user & pass: %v", err)
 		}
-		return WriteJson(w, http.StatusOK, u)
+		return db.WriteJson(w, http.StatusOK, u)
 	} else {
-		return WriteJson(w, http.StatusBadRequest, nil)
+		return db.WriteJson(w, http.StatusBadRequest, nil)
 	}
 
 }
@@ -144,13 +140,13 @@ func (s *Server) HandleUserUpdate(w http.ResponseWriter, r *http.Request) error 
 	np := "SuccessfullyUpdatedPass1"
 	username := "testuser2"
 
-	UpdateUser(s.db, username, np)
-	return WriteJson(w, http.StatusOK, nil)
+	db.UpdateUser(s.Db, username, np)
+	return db.WriteJson(w, http.StatusOK, nil)
 }
 
 func (s *Server) HandleUserDelete(w http.ResponseWriter, r *http.Request) error {
 	username := "testuser2"
 
-	DeleteUser(s.db, username)
-	return WriteJson(w, http.StatusOK, nil)
+	db.DeleteUser(s.Db, username)
+	return db.WriteJson(w, http.StatusOK, nil)
 }
