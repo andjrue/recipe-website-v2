@@ -23,11 +23,11 @@ func NewRecipe(title, descrip, ingre, ttm, steps string) *Recipe {
     }
 }
 
-func (s *Server) HandleAddRecipe() error {
+func HandleAddRecipe(s *structs.Server) error {
     return nil
 }
 
-func (s *Server) HandleGetRecipes() error {
+func HandleGetAllRecipes(s *structs.Server) error {
     return nil
 }
 

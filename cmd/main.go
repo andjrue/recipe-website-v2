@@ -36,7 +36,7 @@ func main() {
 
     log.Println("Listening on port: ", s)
 
-    s.Run()
+    router.Run(s)
 
     log.Println("Server closed?")
 

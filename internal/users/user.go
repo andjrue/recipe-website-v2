@@ -90,7 +90,7 @@ func CheckEmail(email string) error {
 	return nil // TODO
 }
 
-func (s *Server) HandleGetAllUsers(w http.ResponseWriter, r *http.Request) error {
+func  HandleGetAllUsers(s *structs.Server, w http.ResponseWriter, r *http.Request) error {
 
 	users, err := db.GetAllUsers(s.Db)
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *Server) HandleGetAllUsers(w http.ResponseWriter, r *http.Request) error
 	return db.WriteJson(w, http.StatusOK, users)
 }
 
-func (s *Server) HandleAddUser(w http.ResponseWriter, r *http.Request) error {
+func  HandleAddUser(s *structs.Server, w http.ResponseWriter, r *http.Request) error {
 
 	var u structs.User
 
@@ -136,7 +136,7 @@ func (s *Server) HandleAddUser(w http.ResponseWriter, r *http.Request) error {
 
 }
 
-func (s *Server) HandleUserUpdate(w http.ResponseWriter, r *http.Request) error {
+func  HandleUserUpdate(s *structs.Server, w http.ResponseWriter, r *http.Request) error {
 	np := "SuccessfullyUpdatedPass1"
 	username := "testuser2"
 
@@ -144,7 +144,7 @@ func (s *Server) HandleUserUpdate(w http.ResponseWriter, r *http.Request) error 
 	return db.WriteJson(w, http.StatusOK, nil)
 }
 
-func (s *Server) HandleUserDelete(w http.ResponseWriter, r *http.Request) error {
+func  HandleUserDelete(s *structs.Server, w http.ResponseWriter, r *http.Request) error {
 	username := "testuser2"
 
 	db.DeleteUser(s.Db, username)

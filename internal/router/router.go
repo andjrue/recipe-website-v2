@@ -4,7 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/andjrue/recipe-website-v2/internal/auth"
 	"github.com/andjrue/recipe-website-v2/internal/db"
+	"github.com/andjrue/recipe-website-v2/internal/recipes"
 	"github.com/andjrue/recipe-website-v2/internal/structs"
 	"github.com/andjrue/recipe-website-v2/internal/users"
 	"github.com/gorilla/pat"
@@ -12,12 +14,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Server structs.Server
 
 
-
-func NewServer(addr string, db *mongo.Client) *Server {
-	return &Server{
+func NewServer(addr string, db *mongo.Client) *structs.Server {
+	return &structs.Server{
 		Addr: addr,
 		Db:   db,
 	}
@@ -26,19 +26,19 @@ func NewServer(addr string, db *mongo.Client) *Server {
 
 
 
-func (s *Server) Run() {
+func Run(s *structs.Server) {
 	router := pat.New()
 
 	// BACKEND USER INFORMATION
 
 	router.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			err := users.HandleGetAllUsers(w, r)
+			err := users.HandleGetAllUsers(s, w, r) 
 			if err != nil {
 				db.WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else if r.Method == "POST" {
-			err := users.HandleAddUser(w, r)
+			err := users.HandleAddUser(s, w, r)
 			if err != nil {
 				db.WriteJson(w, http.StatusBadRequest, err)
 			}
@@ -57,12 +57,12 @@ func (s *Server) Run() {
             // I'll leave it like this for now I guess. 
             db.WriteJson(w, http.StatusBadRequest, nil)
 		} else if r.Method == "PATCH" {
-			err := db.HandleUserUpdate(w, r)
+			err := users.HandleUserUpdate(s, w, r)
 			if err != nil {
 				db.WriteJson(w, http.StatusBadRequest, err)
 			}
 		} else if r.Method == "DELETE" { // We want this here and not on Users, because we don't want someone deleting someone else.
-			err := db.HandleUserDelete(w, r)
+			err := users.HandleUserDelete(s, w, r)
 			if err != nil {
 				db.WriteJson(w, http.StatusBadRequest, err)
 			}
@@ -77,7 +77,7 @@ func (s *Server) Run() {
 	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			// TODO -- Should query the DB, find the username and check if information entered in is correct. Should be prett simple?
-			err := db.CheckUserSignin(w, r)
+			err := auth.CheckUserSignin(s, w, r)
 			if err != nil {
                 db.WriteJson(w, http.StatusBadRequest, err)
 				log.Fatal("User creds do not match")
@@ -89,13 +89,13 @@ func (s *Server) Run() {
 
     router.HandleFunc("/getAllRecipes", func(w http.ResponseWriter, r *http.Request) {
         if r.Method == "GET" {
-            err := db.HandleGetAllRecipes(w, r) // TODO
+            err := recipes.HandleGetAllRecipes(s) // TODO
             if err != nil {
                 db.WriteJson(w, http.StatusBadRequest, err) // This really shouldn't happen, but you never know
                 log.Println("No recipes available: %v", err)
             }
         } else if r.Method == "POST" {
-            err := db.HandleAddRecipe(w, r) // TODO
+            err := recipes.HandleAddRecipe(s) // TODO
             if err != nil {
                 db.WriteJson(w, http.StatusBadRequest, err)
                 log.Println("Error adding recipe to user: %v", err)
