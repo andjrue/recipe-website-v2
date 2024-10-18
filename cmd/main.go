@@ -29,13 +29,15 @@ func main() {
     
     // SERVER
     s := NewServer(":6969", client)
+
+    // Hey, let's make sure we dont have another terminal open still running the same port. That will cause a lot of unecessary problems. 
+
     log.Println("Listening on port: ", s)
 
     s.Run()
 
     log.Println("Server closed?")
 
-    select {}
 
 }
 

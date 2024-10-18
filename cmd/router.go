@@ -91,10 +91,26 @@ func (s *Server) Run() {
                 writeJson(w, http.StatusBadRequest, err)
 				log.Fatal("User creds do not match")
 			}
-			writeJson(w, http.StatusOK, nil)
-		}
+		} 
 	})
+    
     // RECIPE ROUTES
+
+    router.HandleFunc("/getAllRecipes", func(w http.ResponseWriter, r *http.Request) {
+        if r.Method == "GET" {
+            err := s.HandleGetAllRecipes(w, r) // TODO
+            if err != nil {
+                writeJson(w, http.StatusBadRequest, err) // This really shouldn't happen, but you never know
+                log.Println("No recipes available: %v", err)
+            }
+        } else if r.Method == "POST" {
+            err := s.HandleAddRecipe(w, r) // TODO
+            if err != nil {
+                writeJson(w, http.StatusBadRequest, err)
+                log.Println("Error adding recipe to user: %v", err)
+            }
+        }
+    })
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173"},
@@ -105,7 +121,10 @@ func (s *Server) Run() {
 
 	handler := c.Handler(router)
 
-	http.ListenAndServe(s.addr, handler)
-	log.Println("Server running")
+    err := http.ListenAndServe(s.addr, handler)
+	if err != nil {
+        log.Printf("error listen and server: %v", err)
+    }
+    log.Println("Server running")
 }
 

@@ -28,7 +28,7 @@ func newUser(email, username, password string, recipe recipes.Recipe) *User {
 		Email:    email,
 		Username: username,
 		Password: password,
-        Recipes: []recipe,
+        Recipes: []recipes.Recipe{recipe},
 	}
 }
 

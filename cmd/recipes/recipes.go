@@ -1,5 +1,9 @@
 package recipes
 
+import (
+    "github.com/andjrue/recipe-website-v2/cmd/router.go"
+)
+
 type Recipe struct {
     Title string 
     Description string 
@@ -8,7 +12,7 @@ type Recipe struct {
     Steps string 
 }
 
-func newRecipe(title, descrip, ingre, ttm, steps string) *Recipe {
+func NewRecipe(title, descrip, ingre, ttm, steps string) *Recipe {
     return &Recipe{
         Title: title,
         Description: descrip,
@@ -18,4 +22,11 @@ func newRecipe(title, descrip, ingre, ttm, steps string) *Recipe {
     }
 }
 
+func (s *main.Server) HandleAddRecipe() error {
+    return nil
+}
+
+func (s *main.Server) HandleGetRecipes() error {
+    return nil
+}
 
