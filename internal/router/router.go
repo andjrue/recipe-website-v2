@@ -72,7 +72,7 @@ func Run(s *structs.Server) {
 		}
 	})
 
-	// USER SIGN IN
+	// USER SIGN INs.
 
 	router.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
@@ -87,7 +87,7 @@ func Run(s *structs.Server) {
     
     // RECIPE ROUTES
 
-    router.HandleFunc("/getAllRecipes", func(w http.ResponseWriter, r *http.Request) {
+    router.HandleFunc("/recipes", func(w http.ResponseWriter, r *http.Request) {
         if r.Method == "GET" {
             err := recipes.HandleGetAllRecipes(s) // TODO
             if err != nil {
@@ -95,7 +95,7 @@ func Run(s *structs.Server) {
                 log.Println("No recipes available: %v", err)
             }
         } else if r.Method == "POST" {
-            err := recipes.HandleAddRecipe(s) // TODO
+            err := recipes.HandleAddRecipe(s, s.Db, "testuser1") // TODO -- Will eventually be from the user struct
             if err != nil {
                 db.WriteJson(w, http.StatusBadRequest, err)
                 log.Println("Error adding recipe to user: %v", err)

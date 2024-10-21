@@ -1,5 +1,13 @@
 package main
 
+/*
+TODO's:
+
+Update handling for existing emails. Should be pretty easy. If email exists, return an err, else allow add to db
+Handle add and getAll from recipes DB
+
+*/
+
 import (
 	"context"
 	"fmt"
@@ -30,7 +38,7 @@ func main() {
     defer client.Disconnect(context.Background())
     
     // SERVER
-    s := router.NewServer(":6969", client)
+    s := router.NewServer(":6968", client)
 
     // Hey, let's make sure we dont have another terminal open still running the same port. That will cause a lot of unecessary problems. 
 
