@@ -95,7 +95,7 @@ func Run(s *structs.Server) {
                 log.Println("No recipes available: %v", err)
             }
         } else if r.Method == "POST" {
-            err := recipes.HandleAddRecipe(s, s.Db, "testuser1") // TODO -- Will eventually be from the user struct
+            err := recipes.HandleAddRecipe(s, s.Db, "drewtestarr") // TODO -- Will eventually be from the user struct
             if err != nil {
                 db.WriteJson(w, http.StatusBadRequest, err)
                 log.Println("Error adding recipe to user: %v", err)

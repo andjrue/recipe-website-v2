@@ -103,6 +103,9 @@ func  HandleGetAllUsers(s *structs.Server, w http.ResponseWriter, r *http.Reques
 func  HandleAddUser(s *structs.Server, w http.ResponseWriter, r *http.Request) error {
 
 	var u structs.User
+    u.Recipes = make([]structs.Recipe, 0)
+
+    log.Printf("Recipe check for new user, should be an empty arr: -%v", u)
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&u)

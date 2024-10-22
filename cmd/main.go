@@ -38,7 +38,7 @@ func main() {
     defer client.Disconnect(context.Background())
     
     // SERVER
-    s := router.NewServer(":6968", client)
+    s := router.NewServer(":8008", client)
 
     // Hey, let's make sure we dont have another terminal open still running the same port. That will cause a lot of unecessary problems. 
 
