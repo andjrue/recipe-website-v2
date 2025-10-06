@@ -8,8 +8,8 @@ import java.util.List;
 
 
 public interface RecipeRepository extends JpaRepository<Recipe, String> {
-    // All methods will filter out soft deleted recipes, I don't feel like adding that to the name
-    List<Recipe> findByTitle(String title);
-    List<Recipe> findByUserId(User user);
+
+    List<Recipe> findByTitleContainingIgnoreCaseAndIsDeletedFalse(String title);
+    List<Recipe> findByUserIdAndIsDeletedFalse(User user);
     List<Recipe> findTop10ByOrderByDatePostedDesc();
 }
