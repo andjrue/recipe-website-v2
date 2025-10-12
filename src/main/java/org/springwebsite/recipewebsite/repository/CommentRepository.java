@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, String> {
     List<Comment> findByUser(User user);
-    List<Comment> findByRecipe(Recipe recipe);
+    List<Comment> findByRecipe(String recipeId);
     long countByUser(User user);
     long countByRecipe(Recipe recipe);
     List<Comment> findTop10ByOrderByDatePostedDesc();
