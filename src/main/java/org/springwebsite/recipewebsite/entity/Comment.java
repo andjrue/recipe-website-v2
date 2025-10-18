@@ -13,11 +13,11 @@ public class Comment {
     private String id;
 
     @ManyToOne
-    @JoinColumn(name = "recipeId")
+    @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private User user;
 
     private String content;
