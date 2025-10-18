@@ -23,21 +23,30 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public long countByUser(User user) {
+    public long countByUser(String userId) {
+
+        User user = new User();
+        user.setId(userId);
+
         return commentRepository.countByUser(user);
     }
 
-    public List<Comment> findByUser(User user) {
+    public List<Comment> findByUser(String userId) {
+
+        User user = new User();
+        user.setId(userId);
+
         return commentRepository.findByUser(user);
+
     }
 
-    public List<Comment> findByRecipeId(Recipe recipeId) {
+    public List<Comment> findByRecipeId(String recipeId) {
         if (recipeId == null) {
             throw new IllegalArgumentException("recipeId cannot be null");
         }
 
         Recipe recipe = new Recipe();
-        recipe.setId(recipeId.getId());
+        recipe.setId(recipeId);
 
         return commentRepository.findByRecipe(recipe.getId());
     }
