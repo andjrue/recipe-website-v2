@@ -2,6 +2,8 @@ package org.springwebsite.recipewebsite.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springwebsite.recipewebsite.entity.Comment;
@@ -55,5 +57,21 @@ public class CommentController {
         List<Comment> comments = this.commentService.findMostRecent();
         return ResponseEntity.ok(comments);
     }
-    
+
+    @PostMapping("/recipe/{recipeId}")
+    public ResponseEntity<Comment> createComment(
+            @PathVariable String recipeId,
+            @RequestBody Comment comment
+    ) {
+        String userId = "12345"; // Stub for now
+
+        try {
+            Comment savedComment = this.commentService.save(comment, recipeId, userId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 }

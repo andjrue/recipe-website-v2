@@ -19,7 +19,22 @@ public class CommentService {
         this.commentRepository = commentRepository;
     }
 
-    public Comment save(Comment comment) {
+    public Comment save(Comment comment, String recipeId, String userId) {
+
+        if (comment == null || comment.getContent() == null || comment.getContent().isBlank()) {
+            throw new IllegalArgumentException("Comment content is required");
+        }
+
+        User creator = new User();
+        creator.setId(userId);
+
+        Recipe recipe = new Recipe();
+        recipe.setId(recipeId);
+
+        comment.setRecipe(recipe);
+        comment.setUser(creator);
+        comment.setDatePosted(java.time.LocalDateTime.now().toString());
+
         return commentRepository.save(comment);
     }
 
@@ -48,7 +63,7 @@ public class CommentService {
         Recipe recipe = new Recipe();
         recipe.setId(recipeId);
 
-        return commentRepository.findByRecipe(recipe.getId());
+        return commentRepository.findByRecipe(recipe);
     }
 
     public List<Comment> findMostRecent() {
